@@ -8,6 +8,11 @@ vim.cmd 'syntax on'
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+vim.filetype.add {
+  pattern = {
+    ['.*%.blade%.php'] = 'blade',
+  },
+}
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -82,6 +87,20 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Keybindings for bufferline.nvim
+
+-- Navigate between buffers
+vim.api.nvim_set_keymap('n', '<Tab>', ':BufferLineCycleNext<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<S-Tab>', ':BufferLineCyclePrev<CR>', { noremap = true, silent = true })
+
+-- Pick a buffer to select
+vim.api.nvim_set_keymap('n', '<leader>bp', ':BufferLinePick<CR>', { noremap = true, silent = true })
+
+-- Close the current buffer
+vim.api.nvim_set_keymap('n', '<leader>bc', ':bdelete<CR>', { noremap = true, silent = true })
+
+-- Pick a buffer to close
+vim.api.nvim_set_keymap('n', '<leader>bx', ':BufferLinePickClose<CR>', { noremap = true, silent = true })
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -111,6 +130,8 @@ vim.api.nvim_set_keymap('i', '<C-s>', '<Esc>:w!<CR>a', { noremap = true, silent 
 vim.api.nvim_set_keymap('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
 -- Map telescope neoclip
 vim.keymap.set('n', '<leader>p', ':Telescope neoclip<CR>', { desc = 'Move focus to the upper window' })
+-- Map tailwindfold
+vim.keymap.set('n', '<leader>g', ':TailwindFoldToggle<CR>', { desc = 'Toggle tailwindfold' })
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -542,7 +563,7 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         emmet_language_server = {
-          filetypes = { 'css', 'eruby', 'html', 'javascript', 'javascriptreact', 'less', 'sass', 'scss', 'pug', 'typescriptreact' },
+          filetypes = { 'css', 'eruby', 'html', 'javascript', 'javascriptreact', 'less', 'sass', 'scss', 'pug', 'typescriptreact', 'blade.php', 'blade' },
           -- Read more about this options in the [vscode docs](https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration).
           -- **Note:** only the options listed in the table are supported.
           init_options = {
@@ -670,12 +691,15 @@ require('lazy').setup({
           lsp_format_opt = 'fallback'
         end
         return {
-          timeout_ms = 500,
+          timeout_ms = 10000,
           lsp_format = lsp_format_opt,
         }
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        html = { 'prettierd', 'prettier', stop_after_first = true },
+        blade = { 'blade-formatter' },
+
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -822,43 +846,43 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
-  { -- Collection of various small independent plugins/modules
-    'echasnovski/mini.nvim',
-    config = function()
-      -- Better Around/Inside textobjects
-      --
-      -- Examples:
-      --  - va)  - [V]isually select [A]round [)]paren
-      --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
-      --  - ci'  - [C]hange [I]nside [']quote
-      require('mini.ai').setup { n_lines = 500 }
-
-      -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
-      -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
-
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
-
-      -- ... and there is more!
-      --  Check out: https://github.com/echasnovski/mini.nvim
-    end,
-  },
+  -- { -- Collection of various small independent plugins/modules
+  --   'echasnovski/mini.nvim',
+  --   config = function()
+  --     -- Better Around/Inside textobjects
+  --     --
+  --     -- Examples:
+  --     --  - va)  - [V]isually select [A]round [)]paren
+  --     --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
+  --     --  - ci'  - [C]hange [I]nside [']quote
+  --     require('mini.ai').setup { n_lines = 500 }
+  --
+  --     -- Add/delete/replace surroundings (brackets, quotes, etc.)
+  --     --
+  --     -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
+  --     -- - sd'   - [S]urround [D]elete [']quotes
+  --     -- - sr)'  - [S]urround [R]eplace [)] [']
+  --     require('mini.surround').setup()
+  --
+  --     -- Simple and easy statusline.
+  --     --  You could remove this setup call if you don't like it,
+  --     --  and try some other statusline plugin
+  --     local statusline = require 'mini.statusline'
+  --     -- set use_icons to true if you have a Nerd Font
+  --     statusline.setup { use_icons = vim.g.have_nerd_font }
+  --
+  --     -- You can configure sections in the statusline by overriding their
+  --     -- default behavior. For example, here we set the section for
+  --     -- cursor location to LINE:COLUMN
+  --     ---@diagnostic disable-next-line: duplicate-set-field
+  --     statusline.section_location = function()
+  --       return '%2l:%-2v'
+  --     end
+  --
+  --     -- ... and there is more!
+  --     --  Check out: https://github.com/echasnovski/mini.nvim
+  --   end,
+  -- },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
@@ -873,30 +897,19 @@ require('lazy').setup({
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = { 'ruby', 'blade', 'html' },
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
     -- config = function()
     --   local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
-    --
     --   parser_config.blade = {
     --     install_info = {
-    --       url = 'https://github.com/EmranMR/tree-sitter-blade',
+    --       url = 'https://github.com/EmranMR/tree-sitter-blade', -- Repository for the Blade parser
     --       files = { 'src/parser.c' },
     --       branch = 'main',
     --     },
     --     filetype = 'blade',
-    --   }
-    --
-    --   vim.filetype.add {
-    --     pattern = {
-    --       ['.*%.blade%.php'] = 'blade',
-    --       ['.*%.html'] = 'htmldjango',
-    --       ['.*%.html%.jinja'] = 'htmldjango',
-    --       ['.*%.html%.jinja2'] = 'htmldjango',
-    --       ['.*%.html%.j2'] = 'htmldjango',
-    --     },
     --   }
     -- end,
     -- There are additional nvim-treesitter modules that you can use to interact
@@ -916,8 +929,15 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   -- add plugins here
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.harpoon',
   -- require 'kickstart.plugins.lint',
+  --require 'kickstart.plugins.bufferline',
+  -- require 'kickstart.plugins.indent-blankline',
+  require 'kickstart.plugins.nvim-ufo',
+  -- require 'kickstart.plugins.yugen',
+  require 'kickstart.plugins.tailwindfold',
+  require 'kickstart.plugins.codeium',
   require 'kickstart.plugins.autopairs',
   --require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.oil',
@@ -987,13 +1007,15 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'buffer' },
+    { name = 'codeium' },
   },
 }
 
 -- Treat blade.php files as HTML files for highlighting purposes
-vim.api.nvim_exec(
-  [[
-  autocmd BufNewFile,BufRead *.blade.php set filetype=html
-]],
-  false
-)
+-- vim.api.nvim_exec(
+--   [[
+--   autocmd BufNewFile,BufRead *.blade.php set filetype=html
+-- ]],
+--   false
+--
+-- )
