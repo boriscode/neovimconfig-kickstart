@@ -836,7 +836,9 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'tokyonight-night'
+
+      -- vim.cmd.colorscheme 'lunaperche'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -929,8 +931,10 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   -- add plugins here
   -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.base16',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.harpoon',
+  require 'kickstart.plugins.lunarvim',
   -- require 'kickstart.plugins.lint',
   --require 'kickstart.plugins.bufferline',
   -- require 'kickstart.plugins.indent-blankline',
@@ -941,7 +945,7 @@ require('lazy').setup({
   require 'kickstart.plugins.autopairs',
   --require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.oil',
-  require 'kickstart.plugins.obsidian',
+  -- require 'kickstart.plugins.obsidian',
   require 'kickstart.plugins.neoclip',
   require 'kickstart.plugins.toggleterm',
   -- require 'kickstart.plugins.neorg',
@@ -1019,3 +1023,16 @@ cmp.setup {
 --   false
 --
 -- )
+vim.diagnostic.config {
+  virtual_text = {
+    prefix = '●', -- Choose a symbol or text for virtual text
+    source = 'always', -- Show the source of the diagnostic
+    spacing = 4, -- Add spacing between text and diagnostic
+  },
+  signs = true, -- Show signs in the gutter
+  underline = true, -- Underline diagnostics in the code
+  update_in_insert = false, -- Update diagnostics in insert mode
+  severity_sort = true, -- Sort diagnostics by severity
+}
+
+vim.cmd 'colorscheme base16-black-metal-gorgoroth'
