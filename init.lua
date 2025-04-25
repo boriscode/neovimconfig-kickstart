@@ -1035,4 +1035,4 @@ vim.diagnostic.config {
   severity_sort = true, -- Sort diagnostics by severity
 }
 
-vim.cmd 'colorscheme base16-black-metal-gorgoroth'
+vim.cmd 'colorscheme base16-black-metal'
